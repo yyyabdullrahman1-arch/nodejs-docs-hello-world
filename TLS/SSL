@@ -1,0 +1,22 @@
+const { createServer, connect } = require('node:tls');
+const { readFileSync } = require('node:fs');
+const port = 8000;
+
+createServer({
+  key: readFileSync('server-key.pem'),
+  cert: readFileSync('server-cert.pem'),
+  ciphers: 'DEFAULT@SECLEVEL=0',
+  minVersion: 'TLSv1',
+}, function(socket) {
+  console.log('Client connected with protocol:', socket.getProtocol());
+  socket.end();
+  this.close();
+})
+.listen(port, () => {
+  connect(port, {
+    ciphers: 'DEFAULT@SECLEVEL=0',
+    minVersion: 'TLSv1',
+    maxVersion: 'TLSv1',
+    ca: [ readFileSync('server-cert.pem') ],
+  });
+});
